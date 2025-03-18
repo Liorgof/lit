@@ -1,0 +1,22 @@
+# Virtual environments
+venv/
+
+# Node modules
+node_modules/
+
+# Build outputs (React)
+frontend/build/
+
+# Logs
+*.log
+
+# dotenv
+.env
+.env.*
+
+# System files
+.DS_Store
+
+# MongoDB secrets / cookies
+cookies.json
+
