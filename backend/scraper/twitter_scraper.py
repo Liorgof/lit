@@ -3,15 +3,25 @@ from datetime import datetime
 from random import randint
 import asyncio
 from scraper.db import save_tweet_to_mongo
+from dotenv import load_dotenv
+import os
+
 MINIMUM_TWEETS = 10
 
-async def scrape_and_store(collection, username, email, password, query=None):
+
+async def scrape_and_store(collection, query=None):
+    load_dotenv() 
+    username = os.getenv('X_USERNAME')
+    email = os.getenv('X_EMAIL')
+    password = os.getenv('X_PASSWORD')
+
     client = Client(language='en-US')
-    if not client:
-        client.login(auth_info_1=username, auth_info_2=email, password=password)
-        client.save_cookies('cookies.json')
-    else:
-        client.load_cookies('cookies.json')
+
+
+    #await client.login(auth_info_1=username, auth_info_2=email, password=password)
+    #client.save_cookies('cookies.json')
+
+    client.load_cookies('cookies.json')
 
     tweet_count = 0
     tweets = None
@@ -57,4 +67,5 @@ async def scrape_and_store(collection, username, email, password, query=None):
         print(f'{datetime.now()} - Got {tweet_count} tweets')
 
     print(f'{datetime.now()} - Done! Got {tweet_count} tweets')
+
 
