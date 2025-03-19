@@ -2,27 +2,29 @@ from twikit import Client, TooManyRequests
 from datetime import datetime
 from random import randint
 import asyncio
-from scraper.db import save_tweet_to_mongo
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from scraper.db import save_tweet_to_mongo
 
 MINIMUM_TWEETS = 10
-
+dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
+load_dotenv(dotenv_path=dotenv_path, override=True)
 
 async def scrape_and_store(collection, query=None):
-    load_dotenv() 
+    # טוען פרטי התחברות מהסביבה
+
     username = os.getenv('X_USERNAME')
     email = os.getenv('X_EMAIL')
     password = os.getenv('X_PASSWORD')
-
+    print(os.getenv('X_USERNAME'))
+    print(os.getenv('X_EMAIL'))
     client = Client(language='en-US')
 
-
+    # תמיד מתחברים ושומרים עוגיות חדשות
     #await client.login(auth_info_1=username, auth_info_2=email, password=password)
     #client.save_cookies('cookies.json')
 
     client.load_cookies('cookies.json')
-
     tweet_count = 0
     tweets = None
 
@@ -61,11 +63,13 @@ async def scrape_and_store(collection, query=None):
                 'Likes': tweet.favorite_count
             }
 
-
             save_tweet_to_mongo(collection, tweet_data)
 
         print(f'{datetime.now()} - Got {tweet_count} tweets')
 
     print(f'{datetime.now()} - Done! Got {tweet_count} tweets')
+
+
+
 
 
