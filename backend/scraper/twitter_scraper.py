@@ -9,6 +9,7 @@ async def scrape_and_store(collection, username, email, password, query=None):
     client = Client(language='en-US')
     if not client:
         client.login(auth_info_1=username, auth_info_2=email, password=password)
+        client.save_cookies('cookies.json')
     else:
         client.load_cookies('cookies.json')
 
