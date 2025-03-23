@@ -4,7 +4,7 @@ from random import randint
 import asyncio
 import os
 from dotenv import load_dotenv
-from scraper.db import save_tweet_to_mongo
+from scraper.db import save_to_mongo
 
 MINIMUM_TWEETS = 10
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env')
@@ -63,7 +63,7 @@ async def scrape_and_store(collection, query=None):
                 'Likes': tweet.favorite_count
             }
 
-            save_tweet_to_mongo(collection, tweet_data)
+            save_to_mongo(collection, tweet_data)
 
         print(f'{datetime.now()} - Got {tweet_count} tweets')
 

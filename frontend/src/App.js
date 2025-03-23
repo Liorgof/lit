@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import WikipediaScraper from "./WikipediaScraper";
+import TweetTable from "./TweetTable";
 
 function App() {
   const [tweets, setTweets] = useState([]);
@@ -77,7 +79,7 @@ function App() {
       )}
 
       <h1 className="mb-4 text-center display-4 fw-bold text-primary">
-        X Scraper Dashboard
+        Scraper Dashboard
       </h1>
 
       {/* כפתורים */}
@@ -156,58 +158,18 @@ function App() {
         </div>
       )}
 
+      <div className="w-100 mt-5">
+        <WikipediaScraper />
+      </div>
+
       {/* טבלה */}
-      {showTable && tweets.length > 0 && (
-        <div className="table-responsive" style={{ maxWidth: "90%" }}>
-          <table className="table table-hover table-striped table-bordered shadow-sm">
-            <thead className="table-primary">
-              <tr className="text-center">
-                <th>#</th>
-                <th>Username</th>
-                <th>Text</th>
-                <th>Created At</th>
-                <th>Retweets</th>
-                <th>Likes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tweets.map((tweet, index) => (
-                <tr key={index}>
-                  <td className="text-center">{tweet.Tweet_count}</td>
-                  <td>{tweet.Username}</td>
-                  <td>{tweet.Text}</td>
-                  <td className="text-center">{tweet.Created_At}</td>
-                  <td className="text-center">{tweet.Retweets}</td>
-                  <td className="text-center">{tweet.Likes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="d-flex justify-content-center mt-4">
-            {page > 1 && (
-              <button
-                className="btn btn-outline-secondary me-2"
-                onClick={() => fetchTweets(page - 1)}
-              >
-                Previous
-              </button>
-            )}
-
-            {hasNext && (
-              <button
-                className="btn btn-outline-secondary"
-                onClick={() => fetchTweets(page + 1)}
-              >
-                Next
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showTable && tweets.length === 0 && (
-        <div className="text-muted fs-5 mt-4">No tweets found.</div>
+      {showTable && (
+        <TweetTable
+          tweets={tweets}
+          page={page}
+          hasNext={hasNext}
+          fetchTweets={fetchTweets}
+        />
       )}
     </div>
   );

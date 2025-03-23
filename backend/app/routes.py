@@ -2,8 +2,10 @@ from flask import Blueprint, request, jsonify
 import asyncio
 import os
 from dotenv import load_dotenv
-from scraper.db import connect_to_mongo
+from scraper.db import twitter_collection, wikipedia_collection
 from scraper.twitter_scraper import scrape_and_store
+from wiki_api import save_wikipedia_summary_and_links, fetch_wikipedia_data
+import wikipedia
 
 # יצירת ה-Blueprint של הראוטים
 main = Blueprint('main', __name__)
@@ -22,7 +24,7 @@ def scrape_tweets():
     if not custom_query:
         return jsonify({"error": "Query is required"}), 400
 
-    collection = connect_to_mongo()
+    collection = twitter_collection()
 
     # הרצה אסינכרונית של פונקציית הסקרייפינג
     asyncio.run(scrape_and_store(collection, query=custom_query))
@@ -32,7 +34,7 @@ def scrape_tweets():
 # שליפה של טוויטים עם פאגינציה
 @main.route('/tweets', methods=['GET'])
 def get_tweets_json():
-    collection = connect_to_mongo()
+    collection = twitter_collection()
 
     page = int(request.args.get('page', 1))
     per_page = 10
@@ -45,3 +47,26 @@ def get_tweets_json():
     )
 
     return jsonify(tweets)
+
+
+@main.route('/wikipedia', methods=['POST'])
+def wikipedia_endpoint():
+    data = request.get_json()
+    query = data.get('query')
+
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+
+    collection = wikipedia_collection()
+
+    try:
+        asyncio.run(save_wikipedia_summary_and_links(collection, query))
+        return jsonify({"message": f"Successfully saved summary and links for '{query}' to MongoDB."})
+
+    except wikipedia.exceptions.PageError:
+        return jsonify({"error": f"No page found for query '{query}'."}), 404
+    except wikipedia.exceptions.DisambiguationError as e:
+        return jsonify({
+            "error": f"Query '{query}' resulted in a disambiguation.",
+            "options": e.options
+        }), 400
