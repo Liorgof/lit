@@ -7,6 +7,7 @@ function TwitterScraper({ onScrapeComplete }) {
   const [showModal, setShowModal] = useState(false);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
+  const [alertType, setAlertType] = useState("info");
 
   const handleScrape = async () => {
     const trimmedQuery = query.trim();
@@ -18,6 +19,7 @@ function TwitterScraper({ onScrapeComplete }) {
     try {
       setIsScraping(true);
       setError("");
+      setAlertType("info");
       setMessage("Scraping started...");
       setShowAlert(true);
 
@@ -32,8 +34,10 @@ function TwitterScraper({ onScrapeComplete }) {
       const data = await response.json();
 
       if (!response.ok) {
+        setAlertType("danger");
         setMessage(data.message || "Scraping failed!");
       } else {
+        setAlertType("success");
         setMessage(data.message || "Scraping completed!");
         if (onScrapeComplete) onScrapeComplete();
       }
@@ -52,10 +56,10 @@ function TwitterScraper({ onScrapeComplete }) {
     <div className="text-center">
       {showAlert && (
         <div
-          className="alert alert-info alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3"
-          style={{ zIndex: 9999 }}
+          className={`alert alert-${alertType} alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3`}
+          style={{ zIndex: 9999, minWidth: "250px" }}
         >
-          {message}
+          <span className="fw-semibold">{message}</span>
           <button
             type="button"
             className="btn-close"

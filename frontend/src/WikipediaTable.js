@@ -1,15 +1,15 @@
 import React from "react";
 
-function TweetTable({ tweets, page, hasNext, fetchTweets }) {
+function WikipediaTable({ entries, page, hasNext, fetchEntries }) {
   return (
     <div
       className="table-responsive"
       style={{
         maxWidth: "90%",
-        overflow: "hidden", // Prevent scrollbars
+        overflow: "hidden",
       }}
     >
-      {tweets && tweets.length > 0 ? (
+      {entries && entries.length > 0 ? (
         <>
           <table
             className="table table-hover table-striped table-bordered shadow-sm mb-0"
@@ -18,19 +18,44 @@ function TweetTable({ tweets, page, hasNext, fetchTweets }) {
             <thead className="table-primary">
               <tr className="text-center">
                 <th style={{ width: "5%" }}>#</th>
-                <th style={{ width: "20%" }}>Username</th>
-                <th style={{ width: "45%" }}>Text</th>
-                <th style={{ width: "20%" }}>Created At</th>
-                <th style={{ width: "5%" }}>Retweets</th>
-                <th style={{ width: "5%" }}>Likes</th>
+                <th style={{ width: "20%" }}>Query</th>
+                <th style={{ width: "55%" }}>Summary</th>
+                <th style={{ width: "20%" }}>Links</th>
               </tr>
             </thead>
             <tbody>
-              {tweets.map((tweet, index) => (
+              {entries.map((entry, index) => (
                 <tr key={index}>
                   <td className="text-center align-middle">
                     {index + 1 + (page - 1) * 10}
                   </td>
+
+                  <td
+                    className="align-middle text-truncate"
+                    title={entry.Query}
+                    style={{
+                      maxWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {entry.Query}
+                  </td>
+
+                  <td
+                    className="align-middle text-truncate"
+                    title={entry.Summary}
+                    style={{
+                      maxWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {entry.Summary}
+                  </td>
+
                   <td
                     className="align-middle text-truncate"
                     style={{
@@ -39,34 +64,28 @@ function TweetTable({ tweets, page, hasNext, fetchTweets }) {
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
-                    title={tweet.Username}
                   >
-                    {tweet.Username}
+                    {entry.Links && entry.Links.length > 0 ? (
+                      <small>
+                        {entry.Links.map((link, i) => (
+                          <span key={i}>
+                            <a
+                              href={`https://en.wikipedia.org/wiki/${encodeURIComponent(
+                                link
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {link}
+                            </a>
+                            {i < entry.Links.length - 1 && ", "}
+                          </span>
+                        ))}
+                      </small>
+                    ) : (
+                      <span className="text-muted small">No links</span>
+                    )}
                   </td>
-                  <td
-                    className="align-middle text-truncate"
-                    style={{
-                      maxWidth: "0",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {tweet.Text}
-                  </td>
-                  <td
-                    className="text-center align-middle"
-                    style={{
-                      maxWidth: "0",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {tweet.Created_At}
-                  </td>
-                  <td className="text-center align-middle">{tweet.Retweets}</td>
-                  <td className="text-center align-middle">{tweet.Likes}</td>
                 </tr>
               ))}
             </tbody>
@@ -77,7 +96,7 @@ function TweetTable({ tweets, page, hasNext, fetchTweets }) {
             {page > 1 && (
               <button
                 className="btn btn-outline-secondary me-2"
-                onClick={() => fetchTweets(page - 1)}
+                onClick={() => fetchEntries(page - 1)}
               >
                 Previous
               </button>
@@ -86,7 +105,7 @@ function TweetTable({ tweets, page, hasNext, fetchTweets }) {
             {hasNext && (
               <button
                 className="btn btn-outline-secondary"
-                onClick={() => fetchTweets(page + 1)}
+                onClick={() => fetchEntries(page + 1)}
               >
                 Next
               </button>
@@ -94,10 +113,12 @@ function TweetTable({ tweets, page, hasNext, fetchTweets }) {
           </div>
         </>
       ) : (
-        <div className="text-muted fs-5 mt-4 text-center">No tweets found.</div>
+        <div className="text-muted fs-5 mt-4 text-center">
+          No Wikipedia results found.
+        </div>
       )}
     </div>
   );
 }
 
-export default TweetTable;
+export default WikipediaTable;

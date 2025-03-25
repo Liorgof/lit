@@ -51,7 +51,6 @@ def get_tweets_json():
     return jsonify(tweets)
 
 
-
 @main.route('/wikipedia', methods=['POST'])
 def wikipedia_endpoint():
     data = request.get_json()
@@ -68,8 +67,39 @@ def wikipedia_endpoint():
 
     except wikipedia.exceptions.PageError:
         return jsonify({"error": f"No page found for query '{query}'."}), 404
+
     except wikipedia.exceptions.DisambiguationError as e:
         return jsonify({
             "error": f"Query '{query}' resulted in a disambiguation.",
             "options": e.options
         }), 400
+
+
+    
+
+@main.route('/wikipedia/entries', methods=['GET'])
+def get_wikipedia_entries():
+    collection = wikipedia_collection()
+
+    page = int(request.args.get('page', 1))
+    per_page = 10
+    skip = (page - 1) * per_page
+
+    cursor = (
+    collection.find({}, {'_id': 0})
+              .sort('Scraped_At', -1)
+              .skip(skip)
+              .limit(per_page)
+    )
+
+
+    entries = list(cursor)
+    total = collection.count_documents({})
+    has_next = (page * per_page) < total
+
+    return jsonify({
+        "entries": entries,
+        "page": page,
+        "hasNext": has_next,
+        "total": total
+    })

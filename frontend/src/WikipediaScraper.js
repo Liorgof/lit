@@ -1,5 +1,4 @@
-// WikipediaScraper.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function WikipediaScraper() {
   const [query, setQuery] = useState("");
@@ -8,12 +7,30 @@ function WikipediaScraper() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState("");
 
+  const [showAlert, setShowAlert] = useState(false);
+  const [message, setMessage] = useState("");
+  const [alertType, setAlertType] = useState("info");
+
+  useEffect(() => {
+    if (showAlert) {
+      const timeout = setTimeout(() => setShowAlert(false), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [showAlert]);
+
   const handleScrape = async () => {
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      setError("Please enter a search query.");
+      return;
+    }
 
     setIsScraping(true);
     setError("");
     setResult(null);
+    setAlertType("info");
+    setMessage("Scraping started...");
+    setShowAlert(true);
 
     try {
       const response = await fetch("http://127.0.0.1:5000/wikipedia", {
@@ -21,31 +38,59 @@ function WikipediaScraper() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: trimmedQuery }),
       });
 
       const data = await response.json();
 
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setResult(data.summary);
+      if (!response.ok || data.error) {
+        setAlertType("danger");
+        setMessage(data.error || "An error occurred while scraping.");
+        setShowAlert(true);
+        return;
       }
-    } catch (err) {
-      console.error("Wikipedia scrape error:", err);
-      setError("Failed to fetch Wikipedia data.");
-    } finally {
-      setIsScraping(false);
+
+      setResult(data.summary);
+      setAlertType("success");
+      setMessage("Wikipedia scraping completed!");
+      setShowAlert(true);
       setShowModal(false);
       setQuery("");
+    } catch (err) {
+      console.error("Wikipedia scrape error:", err);
+      setAlertType("danger");
+      setMessage("Failed to fetch Wikipedia data.");
+      setShowAlert(true);
+    } finally {
+      setIsScraping(false);
     }
   };
 
   return (
     <div className="text-center">
+      {/* Alert */}
+      {showAlert && (
+        <div
+          className={`alert alert-${alertType} alert-dismissible fade show position-fixed top-0 end-0 mt-3 me-3`}
+          style={{ zIndex: 9999, minWidth: "250px" }}
+        >
+          <span className="fw-semibold">{message}</span>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setShowAlert(false)}
+          ></button>
+        </div>
+      )}
+
+      {/* Trigger Button */}
       <button
         className="btn btn-primary btn-lg px-4"
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          setShowModal(true);
+          setError("");
+          setQuery("");
+        }}
       >
         Scrape Wikipedia
       </button>
@@ -72,11 +117,13 @@ function WikipediaScraper() {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter topic..."
+                  placeholder="Enter your query..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
+                {error && <div className="text-danger mt-2 small">{error}</div>}
               </div>
+
               <div className="modal-footer">
                 <button
                   className="btn btn-secondary"
@@ -85,7 +132,7 @@ function WikipediaScraper() {
                   Cancel
                 </button>
                 <button
-                  className="btn btn-warning"
+                  className="btn btn-primary"
                   onClick={handleScrape}
                   disabled={isScraping}
                 >
@@ -101,23 +148,6 @@ function WikipediaScraper() {
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div
-          className="mt-4 p-4 bg-white shadow rounded text-start mx-auto"
-          style={{ maxWidth: "800px" }}
-        >
-          <h5 className="text-dark">Summary:</h5>
-          <p>{result}</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="alert alert-danger mt-4" role="alert">
-          {error}
         </div>
       )}
     </div>
