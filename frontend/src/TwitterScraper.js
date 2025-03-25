@@ -30,8 +30,13 @@ function TwitterScraper({ onScrapeComplete }) {
       });
 
       const data = await response.json();
-      setMessage(data.message || "Scraping completed!");
-      if (onScrapeComplete) onScrapeComplete();
+
+      if (!response.ok) {
+        setMessage(data.message || "Scraping failed!");
+      } else {
+        setMessage(data.message || "Scraping completed!");
+        if (onScrapeComplete) onScrapeComplete();
+      }
     } catch (error) {
       console.error("Error scraping:", error);
       setMessage("Scraping failed!");

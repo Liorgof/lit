@@ -72,6 +72,6 @@ async def scrape_and_store(collection, query=None):
         raise e
 
     if not success:
-        raise Exception("No tweets were scraped – possible query issue or rate limiting.")
+        raise Exception("No tweets were scraped - possible query issue or rate limiting.")
 
     print(f'{datetime.now()} - Done! Got {tweet_count} tweets')

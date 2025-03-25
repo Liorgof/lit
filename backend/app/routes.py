@@ -25,11 +25,12 @@ def scrape_tweets():
         return jsonify({"error": "Query is required"}), 400
 
     collection = twitter_collection()
-
+    try:
     # הרצה אסינכרונית של פונקציית הסקרייפינג
-    asyncio.run(scrape_and_store(collection, query=custom_query))
-
-    return jsonify({"message": f"Scraping completed for query: {custom_query}"})
+        asyncio.run(scrape_and_store(collection, query=custom_query))
+        return jsonify({"message": f"Scraping completed for query: {custom_query}"})
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 # שליפה של טוויטים עם פאגינציה
 @main.route('/tweets', methods=['GET'])
@@ -42,11 +43,13 @@ def get_tweets_json():
 
     tweets = list(
         collection.find({}, {'_id': 0})
+        .sort('Scraped_At', -1)  # DESCENDING = Newest first
         .skip(skip)
         .limit(per_page)
     )
 
     return jsonify(tweets)
+
 
 
 @main.route('/wikipedia', methods=['POST'])
