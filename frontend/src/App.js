@@ -58,12 +58,10 @@ function App() {
         </button>
       </div>
 
-      {/* Wikipedia Scraper */}
       <div className="mb-4">
         <WikipediaScraper />
       </div>
 
-      {/* Tweet Table */}
       {showTable && (
         <TweetTable
           tweets={tweets}
