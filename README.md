@@ -60,8 +60,9 @@ lit/
    ```
 6. **Run the Flask backend:**
    ```bash
-	 python run.py
-It will start on `http://localhost:5000`
+   	 python run.py
+   It will start on `http://localhost:5000`
+   ```
 
 ## 🌐 Frontend Setup (React)
 
