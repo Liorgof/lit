@@ -103,3 +103,28 @@ def get_wikipedia_entries():
         "hasNext": has_next,
         "total": total
     })
+
+@main.route('/wikipedia/graph', methods=['GET'])
+def wikipedia_graph():
+    collection = wikipedia_collection()
+
+    nodes = {}
+    links = []
+
+    for doc in collection.find():
+        source = doc["Query"]
+        if source not in nodes:
+            nodes[source] = {"id": source, "summary": doc.get("Summary", "")}
+
+        for target in doc.get("Links", []):
+            if target not in nodes:
+                nodes[target] = {"id": target, "summary": ""}
+            links.append({
+                "source": source,
+                "target": target
+            })
+
+    return jsonify({
+        "nodes": list(nodes.values()),
+        "links": links
+    })

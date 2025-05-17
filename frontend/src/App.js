@@ -4,11 +4,11 @@ import WikipediaScraper from "./WikipediaScraper";
 import TweetTable from "./TweetTable";
 import TwitterScraper from "./TwitterScraper";
 import WikipediaTable from "./WikipediaTable";
+import WikipediaGraph from "./WikipediaGraph";
 
 function App() {
   const [tweets, setTweets] = useState([]);
   const [page, setPage] = useState(1);
-  const [showTable, setShowTable] = useState(false);
   const [hasNext, setHasNext] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -16,7 +16,8 @@ function App() {
   const [wikiPage, setWikiPage] = useState(1);
   const [wikiHasNext, setWikiHasNext] = useState(false);
   const [isWikiLoading, setIsWikiLoading] = useState(false);
-  const [showWikiTable, setShowWikiTable] = useState(false);
+
+  const [activeView, setActiveView] = useState(null); // values: 'tweets', 'wikiTable', 'wikiGraph'
 
   const perPage = 10;
 
@@ -31,8 +32,6 @@ function App() {
       setTweets(data);
       setPage(pageNumber);
       setHasNext(data.length === perPage);
-      setShowWikiTable(false);
-      setShowTable(true);
     } catch (error) {
       console.error("Error fetching tweets:", error);
     } finally {
@@ -50,8 +49,6 @@ function App() {
       setWikiEntries(data.entries || []);
       setWikiPage(data.page || 1);
       setWikiHasNext(data.hasNext || false);
-      setShowTable(false);
-      setShowWikiTable(true);
     } catch (err) {
       console.error("Failed to fetch Wikipedia entries:", err);
     } finally {
@@ -59,7 +56,6 @@ function App() {
     }
   };
 
-  console.log("Loaded wiki entries:", wikiEntries);
 
   return (
     <div className="min-vh-100 d-flex flex-column justify-content-start align-items-center bg-light py-5">
@@ -73,7 +69,10 @@ function App() {
 
         <button
           className="btn btn-success btn-lg px-4 d-flex align-items-center"
-          onClick={() => loadAndShowTweets(1)}
+          onClick={() => {
+            loadAndShowTweets(1);
+            setActiveView("tweets");
+          }}
           disabled={isLoading}
         >
           {isLoading && (
@@ -92,7 +91,10 @@ function App() {
 
         <button
           className="btn btn-success btn-lg px-4 d-flex align-items-center"
-          onClick={() => loadAndShowWiki(1)}
+          onClick={() => {
+            loadAndShowWiki(1);
+            setActiveView("wikiTable");
+          }}
           disabled={isWikiLoading}
         >
           {isWikiLoading && (
@@ -104,9 +106,18 @@ function App() {
           )}
           {isWikiLoading ? "Loading..." : "Load Wikipedia"}
         </button>
-      </div>
 
-      {showTable && (
+        <button
+          className="btn text-white btn-warning btn-lg px-4 d-flex align-items-center"
+          onClick={() => {
+            setActiveView("wikiGraph");
+          }}
+        >
+          Show Wikipedia Graph
+        </button>
+      </div>
+      {activeView === "wikiGraph" && <WikipediaGraph />}
+      {activeView === "tweets" && (
         <TweetTable
           tweets={tweets}
           page={page}
@@ -114,8 +125,7 @@ function App() {
           fetchTweets={loadAndShowTweets}
         />
       )}
-
-      {showWikiTable && (
+      {activeView === "wikiTable" && (
         <WikipediaTable
           entries={wikiEntries}
           page={wikiPage}
